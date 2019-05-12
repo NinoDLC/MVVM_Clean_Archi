@@ -30,23 +30,28 @@ class MainViewModel(private val useCase: WeatherUseCase) : ViewModel() {
         }
 
         // Coroutine stuff, look this up !!
-        currentJob = viewModelScope.launch {
+        currentJob = viewModelScope.launch(Dispatchers.IO) {
 
             // Let user finish typing before actually querying the server (don't congest it)
-            delay(500)
+            queryWeather(city)
+        }
+    }
 
-            // Query server
-            val weatherResponse = useCase.getWeather(city)
+    suspend fun queryWeather(city: String?) {
+        delay(500)
 
-            // Switches to the Main thread to set LiveData synchronously once API query is done
-            withContext(Dispatchers.Main) {
-                if (weatherResponse != null) {
-                    _weatherLiveData.value = "Dans la ville ${weatherResponse.cityName}, il fait ${weatherResponse.weatherValues.temperature}°C"
-                } else {
-                    _weatherLiveData.value =
-                        "$city est une ville inconnue au bataillon, entrez une vraie ville svp. " +
-                                "Ou connectez-vous aux internets. "
-                }
+        // Query server
+        val weatherResponse = useCase.getWeather(city)
+
+        // Switches to the Main thread to set LiveData synchronously once API query is done
+        withContext(Dispatchers.Main) {
+            if (weatherResponse != null) {
+                _weatherLiveData.value =
+                    "Dans la ville ${weatherResponse.cityName}, il fait ${weatherResponse.weatherValues.temperature}°C"
+            } else {
+                _weatherLiveData.value =
+                    "$city est une ville inconnue au bataillon, entrez une vraie ville svp. " +
+                            "Ou connectez-vous aux internets. "
             }
         }
     }

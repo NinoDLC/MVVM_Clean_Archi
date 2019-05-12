@@ -55,8 +55,10 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
 
     // Unit tests
-    testImplementation "junit:junit:4.12"
-    testImplementation "org.mockito:mockito-core:2.23.0"
+    testImplementation "junit:junit:4.12" // Assertions... and stuff
+    testImplementation "org.mockito:mockito-core:2.23.0" // @Mock and @Spy... and stuff
+    testImplementation "android.arch.core:core-testing:1.1.1" // LiveData tools for Unit Testing
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.2.1' // Coroutine tools for Unit Testing
 
     // Android tests
     androidTestImplementation "androidx.test:runner:1.2.0-alpha04"

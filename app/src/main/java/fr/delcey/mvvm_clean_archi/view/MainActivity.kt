@@ -37,5 +37,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.main_btn_insert).setOnClickListener {
             viewModel.insertData()
         }
+
+        findViewById<Button>(R.id.main_btn_refresh).setOnClickListener {
+            viewModel.refreshData()
+        }
     }
 }

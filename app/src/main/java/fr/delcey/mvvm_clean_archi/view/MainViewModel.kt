@@ -2,7 +2,7 @@ package fr.delcey.mvvm_clean_archi.view
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.delcey.mvvm_clean_archi.Mock
@@ -13,99 +13,68 @@ import fr.delcey.mvvm_clean_archi.data.PropertyDao
 import fr.delcey.mvvm_clean_archi.view.model.PropertyUiModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel(
     private val propertyDao: PropertyDao,
     private val addressDao: AddressDao
 ) : ViewModel() {
 
-    // We expose a LiveData but manipulate a MediatorLiveData internaly
-    private val _uiPropertiesLiveData = MediatorLiveData<List<PropertyUiModel>>()
+    // Don't use a Mediator since we are querying the data ourselves synchronously...
+    // It's simpler to wait for all the data to load to actually merge the stuff
+    private val _uiPropertiesLiveData = MutableLiveData<List<PropertyUiModel>>()
     val uiPropertiesLiveData: LiveData<List<PropertyUiModel>> = _uiPropertiesLiveData
-
-    init {
-        wireUpMediator()
-    }
 
     fun insertData() {
         viewModelScope.launch(Dispatchers.IO) {
             val newAddressId = addressDao.insertAddress(Address(path = Mock.getAddress()))
 
             propertyDao.insertProperty(Property(type = Mock.getType(), addressId = newAddressId))
+
+            // Here if we would want to refresh the displayed list, we would have to do a new query
+            // and change the livedata value with the result (that should contains one more row)
+
+            // refreshData()
         }
     }
 
-    private fun wireUpMediator() {
-        val propertiesLiveData = propertyDao.getProperties()
-        val addressesLiveData = addressDao.getAddresses()
+    /* *********************
+     *  COROUTINE EXAMPLE  *
+     ********************* */
+    // https://developer.android.com/training/data-storage/room/accessing-data#kotlin-coroutines
+    //
+    // THIS IS A COMPLETELY DIFFERENT APPROACH TO DO QUERIES WITH ROOM WITH LIVEDATA, DON'T USE BOTH !
+    // We don't use LiveData to "wait" for data from the repository,
+    // We use LiveData to expose the UI data at the UI layer (as an Observable pattern usage), nothing more.
+    // We use Coroutines to do asynchronous work
+    //
+    // The tradeoff of this is the queries would be sequential, meaning the results would take up to O*n time to
+    // compute, instead of O time with LiveData (O being the longest "work time" for a query and n the number of queries done)
+    // Also, we wouldn't be notified that the underling data has changed : we lose reactivity to Room data.
+    // The advantage is we query the data only when we need it, this could be usefull for large set of data that don't
+    // have to be reactive
+    fun refreshData() {
 
-        _uiPropertiesLiveData.addSource(propertiesLiveData) {
-            _uiPropertiesLiveData.value = combinePropertiesAndAddresses(
-                it,
-                addressesLiveData.value
-            )
-        }
-
-        _uiPropertiesLiveData.addSource(addressesLiveData) {
-            _uiPropertiesLiveData.value = combinePropertiesAndAddresses(
-                propertiesLiveData.value,
-                it
-            )
+        // Coroutine stuff, look this up !!
+        viewModelScope.launch(Dispatchers.IO) {
+            doStuffOffMainThread()
         }
     }
 
-    // TODO TO UNIT TEST !!
-    @VisibleForTesting
-    fun combinePropertiesAndAddresses(
-        properties: List<Property>?,
-        addresses: List<Address>?
-    ): List<PropertyUiModel> {
+    // This method is invoked in a coroutine, meaning it can block its thread if necessary, we are not on the MainThread :)
+    private suspend fun doStuffOffMainThread() {
 
-        @Suppress("CascadeIf") // This is simpler this way... this is just for demo
-        if (properties == null) {
-            return listOf()
-        } else if (addresses == null) {
+        val properties = propertyDao.getPropertiesAsSuspend()
+        val addresses = addressDao.getAddressesAsSuspend()
 
-            /* If the "map" line confuses you, consider this "map" line is the same as following :
-
-            val listProperty = ArrayList<PropertyUiModel>()
-
-            for (item in properties) {
-                listProperty.add(PropertyUiModel(item.id, item.type))
-            }
-
-            return listProperty
-
-            */
-
-            return properties.map {
-                buildUiModel(it)
-            }
-        } else {
-
-            /* If the "zip/map" line confuses you, consider this "zip/map" line is the same as following :
-
-            val listProperty = ArrayList<PropertyUiModel>()
-
-            for (i in 0..min(properties.size, addresses.size)) {
-                listProperty.add(
-                    PropertyUiModel(
-                        listProperty[i].id,
-                        listProperty[i].type,
-                        makeHumanReadableAddress(addresses[i])
-                    )
-                )
-            }
-
-            return listProperty
-
-            */
-
-            return properties
-                .zip(addresses) // "Merge" 2 lists together and make a List<Pair<Property, Address>>
-                .map {
-                    buildUiModel(it.first, it.second)
-                }
+        // Switches to the Main thread to set LiveData synchronously once API query is done
+        withContext(Dispatchers.Main) {
+            _uiPropertiesLiveData.value =
+                properties
+                    .zip(addresses)
+                    .map {
+                        buildUiModel(it.first, it.second)
+                    }
         }
     }
 
@@ -121,4 +90,5 @@ class MainViewModel(
     // TODO THIS METHOD SHOULD BE USEFUL... RIGHT NOW IT'S NO USE FOR USER ! MAKE IT RETURN A NICE ADDRESS FOR USER
     @VisibleForTesting
     fun makeHumanReadableAddress(address: Address?): String? = address?.toString()
+
 }

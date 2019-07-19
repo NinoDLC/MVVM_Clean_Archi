@@ -9,37 +9,4 @@
     tools:context=".view.MainActivity"
     >
 
-  <com.google.android.material.textfield.TextInputLayout
-      android:id="@+id/main_til_input"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      app:layout_constraintBottom_toTopOf="@id/main_tv_result"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      >
-
-    <EditText
-        android:id="@+id/main_et_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/city"
-        android:importantForAutofill="no"
-        android:inputType="textPostalAddress"
-        tools:targetApi="o"
-        />
-  </com.google.android.material.textfield.TextInputLayout>
-
-  <TextView
-      android:id="@+id/main_tv_result"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/main_til_input"
-      tools:text="A Lyon, il fait 25°C"
-      />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         val mainAdapter = MainAdapter()
 
-        val recyclerView : RecyclerView = findViewById(R.id.main_rv)
+        val recyclerView: RecyclerView = findViewById(R.id.main_rv)
 
         with(recyclerView) {
             layoutManager = LinearLayoutManager(context)
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Update UI when ViewModel has a fresh data to display
-        viewModel.propertiesLiveData.observe(this, Observer {
+        viewModel.uiPropertiesLiveData.observe(this, Observer {
             mainAdapter.setData(it)
         })
 

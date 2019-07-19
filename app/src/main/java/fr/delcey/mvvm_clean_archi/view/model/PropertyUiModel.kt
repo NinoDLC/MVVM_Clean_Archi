@@ -1,4 +1,4 @@
-package fr.delcey.mvvm_clean_archi.view
+package fr.delcey.mvvm_clean_archi.view.model
 
 data class PropertyUiModel(
     val id : Int, // Shared between Property and Address

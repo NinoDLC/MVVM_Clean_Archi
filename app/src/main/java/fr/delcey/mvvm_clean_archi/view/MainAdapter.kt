@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import fr.delcey.mvvm_clean_archi.R
+import fr.delcey.mvvm_clean_archi.view.model.PropertyUiModel
 
 // ListAdapter would be better suited for our example, look it up
 class MainAdapter : RecyclerView.Adapter<MainAdapter.MainViewHolder>() {

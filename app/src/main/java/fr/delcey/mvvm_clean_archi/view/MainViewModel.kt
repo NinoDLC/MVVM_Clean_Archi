@@ -1,56 +1,124 @@
 package fr.delcey.mvvm_clean_archi.view
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import fr.delcey.mvvm_clean_archi.Mock
+import fr.delcey.mvvm_clean_archi.data.Address
+import fr.delcey.mvvm_clean_archi.data.AddressDao
+import fr.delcey.mvvm_clean_archi.data.Property
+import fr.delcey.mvvm_clean_archi.data.PropertyDao
+import fr.delcey.mvvm_clean_archi.view.model.PropertyUiModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val propertyDao: PropertyDao,
+    private val addressDao: AddressDao
+) : ViewModel() {
 
-    // We expose a LiveData but manipulate a MutableLiveData internaly
-    private val _propertiesLiveData = MutableLiveData<List<PropertyUiModel>>()
-    val propertiesLiveData: LiveData<List<PropertyUiModel>> = _propertiesLiveData
-
-    // We keep reference to previous job to cancel it if necessary
-    private var currentJob: Job? = null
+    // We expose a LiveData but manipulate a MediatorLiveData internaly
+    private val _uiPropertiesLiveData = MediatorLiveData<List<PropertyUiModel>>()
+    val uiPropertiesLiveData: LiveData<List<PropertyUiModel>> = _uiPropertiesLiveData
 
     init {
-        refreshData()
-    }
-
-    private fun refreshData() {
-
-        // Cancel a previous job if a new one is scheduled before the end of the first one
-        currentJob?.let {
-            if (it.isActive) {
-                it.cancel()
-            }
-        }
-
-        // Coroutine stuff, look this up !!
-        currentJob = viewModelScope.launch(Dispatchers.IO) {
-            doStuffAsynchronously()
-        }
-    }
-
-    private suspend fun doStuffAsynchronously() {
-        // TODO MAKE SOME SQL QUERY HERE
-        val mockList: List<PropertyUiModel> = listOf(
-            PropertyUiModel(1, "FLAT", "10880 Malibu Point"),
-            PropertyUiModel(2, "MANSION", "10236 Charing Cross Rd, Los Angeles, CA 90024, USA")
-        )
-
-        // Switches to the Main thread to set LiveData synchronously once API query is done
-        withContext(Dispatchers.Main) {
-            _propertiesLiveData.value = mockList
-        }
+        wireUpMediator()
     }
 
     fun insertData() {
-        // TODO INSERT DATA
+        viewModelScope.launch(Dispatchers.IO) {
+            val newAddressId = addressDao.insertAddress(Address(path = Mock.getAddress()))
+
+            propertyDao.insertProperty(Property(type = Mock.getType(), addressId = newAddressId))
+        }
     }
+
+    private fun wireUpMediator() {
+        val propertiesLiveData = propertyDao.getProperties()
+        val addressesLiveData = addressDao.getAddresses()
+
+        _uiPropertiesLiveData.addSource(propertiesLiveData) {
+            _uiPropertiesLiveData.value = combinePropertiesAndAddresses(
+                it,
+                addressesLiveData.value
+            )
+        }
+
+        _uiPropertiesLiveData.addSource(addressesLiveData) {
+            _uiPropertiesLiveData.value = combinePropertiesAndAddresses(
+                propertiesLiveData.value,
+                it
+            )
+        }
+    }
+
+    // TODO TO UNIT TEST !!
+    @VisibleForTesting
+    fun combinePropertiesAndAddresses(
+        properties: List<Property>?,
+        addresses: List<Address>?
+    ): List<PropertyUiModel> {
+
+        @Suppress("CascadeIf") // This is simpler this way... this is just for demo
+        if (properties == null) {
+            return listOf()
+        } else if (addresses == null) {
+
+            /* If the "map" line confuses you, consider this "map" line is the same as following :
+
+            val listProperty = ArrayList<PropertyUiModel>()
+
+            for (item in properties) {
+                listProperty.add(PropertyUiModel(item.id, item.type))
+            }
+
+            return listProperty
+
+            */
+
+            return properties.map {
+                buildUiModel(it)
+            }
+        } else {
+
+            /* If the "zip/map" line confuses you, consider this "zip/map" line is the same as following :
+
+            val listProperty = ArrayList<PropertyUiModel>()
+
+            for (i in 0..min(properties.size, addresses.size)) {
+                listProperty.add(
+                    PropertyUiModel(
+                        listProperty[i].id,
+                        listProperty[i].type,
+                        makeHumanReadableAddress(addresses[i])
+                    )
+                )
+            }
+
+            return listProperty
+
+            */
+
+            return properties
+                .zip(addresses) // "Merge" 2 lists together and make a List<Pair<Property, Address>>
+                .map {
+                    buildUiModel(it.first, it.second)
+                }
+        }
+    }
+
+    // Builds the Model to be presented to the View from the Models inside the data layer
+    private fun buildUiModel(property: Property, address: Address? = null) =
+        PropertyUiModel(
+            property.id,
+            property.type,
+            makeHumanReadableAddress(address)
+        )
+
+    // TODO TO UNIT TEST !!
+    // TODO THIS METHOD SHOULD BE USEFUL... RIGHT NOW IT'S NO USE FOR USER ! MAKE IT RETURN A NICE ADDRESS FOR USER
+    @VisibleForTesting
+    fun makeHumanReadableAddress(address: Address?): String? = address?.toString()
 }

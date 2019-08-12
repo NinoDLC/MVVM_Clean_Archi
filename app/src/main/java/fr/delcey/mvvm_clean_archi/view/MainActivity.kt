@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         // Update UI when ViewModel has a fresh data to display
         viewModel.weatherLiveData.observe(this, Observer {
-            main_tv_result.text = it
+            main_tv_result.text = it.cityTemperature
         })
 
         // Tell ViewModel the query has changed when user is typing

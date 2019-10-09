@@ -58,7 +58,7 @@ class MainViewModelTest {
         viewModel.queryWeather("London")
 
         // Then
-        assertEquals("Dans la ville London, il fait 25.0°C", viewModel.weatherLiveData.value)
+        assertEquals("Dans la ville London, il fait 25.0°C", viewModel.weatherLiveData.value?.cityTemperature)
     }
 
     @Test
@@ -73,7 +73,7 @@ class MainViewModelTest {
         viewModel.queryWeather("Le village d'Astérix")
 
         // Then
-        assertEquals("Dans la ville Le village d'Astérix, il fait -8000.0°C", viewModel.weatherLiveData.value)
+        assertEquals("Dans la ville Le village d'Astérix, il fait -8000.0°C", viewModel.weatherLiveData.value?.cityTemperature)
     }
 
     @Test
@@ -88,7 +88,7 @@ class MainViewModelTest {
         viewModel.queryWeather("Le village des Ch'tis")
 
         // Then
-        assertEquals("Dans la ville Calais, il fait -20.0°C", viewModel.weatherLiveData.value)
+        assertEquals("Dans la ville Calais, il fait -20.0°C", viewModel.weatherLiveData.value?.cityTemperature)
     }
 
 
@@ -106,7 +106,7 @@ class MainViewModelTest {
         // Then
         assertEquals(
             "Mon chat s'est endormi sur le claaaaaaaaaaaavier est une ville inconnue au bataillon, entrez une vraie ville svp. Ou connectez-vous aux internets. ",
-            viewModel.weatherLiveData.value
+            viewModel.weatherLiveData.value?.cityTemperature
         )
     }
 }

@@ -56,9 +56,10 @@ dependencies {
 
     // Unit tests
     testImplementation "junit:junit:4.12" // Assertions... and stuff
-    testImplementation "org.mockito:mockito-core:2.28.2" // @Mock and @Spy... and stuff
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0" // @Mock and @Spy... and stuff
     testImplementation "android.arch.core:core-testing:1.1.1" // LiveData tools for Unit Testing
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.2.2' // Coroutine tools for Unit Testing
+    testImplementation 'org.hamcrest:hamcrest-library:1.3' // Helps asserting (lists for example)
 
     // Android tests
     androidTestImplementation "androidx.test:runner:1.3.0-alpha02"

@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey
     )]
 )
 data class Property(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val type: String,
     val addressId: Long
 )

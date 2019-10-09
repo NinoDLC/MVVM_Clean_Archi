@@ -62,7 +62,8 @@ class MainViewModel(
     }
 
     // This method is invoked in a coroutine, meaning it can block its thread if necessary, we are not on the MainThread :)
-    private suspend fun doStuffOffMainThread() {
+    @VisibleForTesting
+    suspend fun doStuffOffMainThread() {
 
         val properties = propertyDao.getPropertiesAsSuspend()
         val addresses = addressDao.getAddressesAsSuspend()
@@ -71,9 +72,8 @@ class MainViewModel(
         withContext(Dispatchers.Main) {
             _uiPropertiesLiveData.value =
                 properties
-                    .zip(addresses)
-                    .map {
-                        buildUiModel(it.first, it.second)
+                    .map { property ->
+                        buildUiModel(property, addresses.find { it.id == property.addressId })
                     }
         }
     }
@@ -89,6 +89,6 @@ class MainViewModel(
     // TODO TO UNIT TEST !!
     // TODO THIS METHOD SHOULD BE USEFUL... RIGHT NOW IT'S NO USE FOR USER ! MAKE IT RETURN A NICE ADDRESS FOR USER
     @VisibleForTesting
-    fun makeHumanReadableAddress(address: Address?): String? = address?.toString()
+    fun makeHumanReadableAddress(address: Address?): String? = address?.path
 
 }

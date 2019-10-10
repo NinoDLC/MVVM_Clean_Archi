@@ -47,7 +47,7 @@ class MainViewModel(
     // We don't use LiveData to "wait" for data from the repository,
     // We use LiveData to expose the UI data at the UI layer (as an Observable pattern usage), nothing more.
     // We use Coroutines to do asynchronous work
-    //
+    // 
     // The tradeoff of this is the queries would be sequential, meaning the results would take up to O*n time to
     // compute, instead of O time with LiveData (O being the longest "work time" for a query and n the number of queries done)
     // Also, we wouldn't be notified that the underling data has changed : we lose reactivity to Room data.

@@ -23,7 +23,7 @@ class MainViewModel(private val useCase: WeatherUseCase) : ViewModel() {
         currentJob?.let {
             if (it.isActive) {
                 it.cancel()
-            }
+            } 
         }
 
         // Coroutine stuff, look this up !!

@@ -2,17 +2,21 @@ package fr.delcey.mvvm_clean_archi.view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import fr.delcey.mvvm_clean_archi.usecases.WeatherUseCase
-import fr.delcey.mvvm_clean_archi.usecases.WeatherUseCaseImpl
+import fr.delcey.mvvm_clean_archi.data.AddressDao
+import fr.delcey.mvvm_clean_archi.data.AppDatabase
+import fr.delcey.mvvm_clean_archi.data.PropertyDao
 import fr.delcey.mvvm_clean_archi.view.ViewModelFactory.Companion
 
 @Suppress("UNCHECKED_CAST")
 /** A singleton always has a private constructor, use [Companion.INSTANCE] to access instance of this. */
-class ViewModelFactory private constructor(private val weatherUseCase: WeatherUseCase) : ViewModelProvider.Factory {
+class ViewModelFactory private constructor(
+    private val propertyDao: PropertyDao,
+    private val addressDao: AddressDao
+) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(weatherUseCase) as T
+            return MainViewModel(propertyDao, addressDao) as T
         }
 
         throw IllegalArgumentException("Unknown ViewModel class")
@@ -20,9 +24,16 @@ class ViewModelFactory private constructor(private val weatherUseCase: WeatherUs
 
     companion object {
         // Dependency injection
-        val INSTANCE = ViewModelFactory(
-            /** Could use any other class implementing [WeatherUseCase] interface here */
-            WeatherUseCaseImpl()
-        )
+        val INSTANCE: ViewModelFactory
+
+        init {
+            val database = AppDatabase.getInstance()
+
+            // Should use UseCases instead but this is shorter and clear approach
+            INSTANCE = ViewModelFactory(
+                database.propertyDao(),
+                database.addressDao()
+            )
+        }
     }
 }

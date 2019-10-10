@@ -5,41 +5,42 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     tools:context=".view.MainActivity"
     >
 
-  <com.google.android.material.textfield.TextInputLayout
-      android:id="@+id/main_til_input"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      app:layout_constraintBottom_toTopOf="@id/main_tv_result"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      >
-
-    <EditText
-        android:id="@+id/main_et_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/city"
-        android:importantForAutofill="no"
-        android:inputType="textPostalAddress"
-        tools:targetApi="o"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/main_rv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/main_btn_insert"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         />
-  </com.google.android.material.textfield.TextInputLayout>
 
-  <TextView
-      android:id="@+id/main_tv_result"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/main_til_input"
-      tools:text="A Lyon, il fait 25°C"
-      />
+    <Button
+        android:id="@+id/main_btn_insert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/main_btn_refresh"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_rv"
+        android:text="@string/insert"
+        />
+
+
+    <Button
+        android:id="@+id/main_btn_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/main_btn_insert"
+        app:layout_constraintTop_toBottomOf="@id/main_rv"
+        android:text="@string/refresh"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

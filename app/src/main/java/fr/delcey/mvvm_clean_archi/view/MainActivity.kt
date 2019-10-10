@@ -1,13 +1,13 @@
 package fr.delcey.mvvm_clean_archi.view
 
 import android.os.Bundle
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.google.android.material.textfield.TextInputEditText
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import fr.delcey.mvvm_clean_archi.R
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,14 +20,26 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
+        val mainAdapter = MainAdapter()
+
+        val recyclerView: RecyclerView = findViewById(R.id.main_rv)
+
+        with(recyclerView) {
+            layoutManager = LinearLayoutManager(context)
+            adapter = mainAdapter
+        }
+
         // Update UI when ViewModel has a fresh data to display
-        viewModel.weatherLiveData.observe(this, Observer {
-            main_tv_result.text = it.cityTemperature
+        viewModel.uiPropertiesLiveData.observe(this, Observer {
+            mainAdapter.setData(it)
         })
 
-        // Tell ViewModel the query has changed when user is typing
-        findViewById<TextInputEditText>(R.id.main_et_input).addTextChangedListener {
-            viewModel.getWeather(it?.toString())
+        findViewById<Button>(R.id.main_btn_insert).setOnClickListener {
+            viewModel.insertData()
+        }
+
+        findViewById<Button>(R.id.main_btn_refresh).setOnClickListener {
+            viewModel.refreshData()
         }
     }
 }

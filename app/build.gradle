@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 28
@@ -27,40 +28,40 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     // Kotlin 2/2
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // Kotlin - Android
-    implementation "androidx.core:core-ktx:1.1.0-alpha05"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.1.0-alpha04"
+    implementation "androidx.core:core-ktx:1.2.0-alpha03"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-alpha03"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
 
     // Kotlin - Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.2"
 
     // Android
-    implementation "androidx.appcompat:appcompat:1.1.0-alpha04"
-    implementation "com.google.android.material:material:1.1.0-alpha05"
+    implementation "androidx.appcompat:appcompat:1.1.0-rc01"
+    implementation "com.google.android.material:material:1.1.0-alpha09"
     implementation "androidx.constraintlayout:constraintlayout:1.1.3"
 
-    // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.5.0" // Core
-    implementation "com.squareup.okhttp3:logging-interceptor:3.14.1" // Interceptor to log API calls in logcat
-    implementation "com.squareup.retrofit2:converter-gson:2.5.0" // Converts JSON to POJO / POKO
+    // Room
+    def room_version = "2.1.0"
 
-    // Gson
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
 
     // Unit tests
     testImplementation "junit:junit:4.12" // Assertions... and stuff
-    testImplementation "org.mockito:mockito-core:2.23.0" // @Mock and @Spy... and stuff
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0" // @Mock and @Spy... and stuff
     testImplementation "android.arch.core:core-testing:1.1.1" // LiveData tools for Unit Testing
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.2.1' // Coroutine tools for Unit Testing
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.2.2' // Coroutine tools for Unit Testing
+    testImplementation 'org.hamcrest:hamcrest-library:1.3' // Helps asserting (lists for example)
 
     // Android tests
-    androidTestImplementation "androidx.test:runner:1.2.0-alpha04"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0-alpha04"
+    androidTestImplementation "androidx.test:runner:1.3.0-alpha02"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0-alpha02"
 }
